@@ -178,3 +178,37 @@ public final class GreetingServiceGrpc {
     }
 
 ```
+
+4. 服务端(基于http2 协议)
+
+使用 grpc-api 包中的ServerBuilder，构建服务端
+```
+        Server server = ServerBuilder.forPort(9988)
+                .addService(new GreetingServiceImpl()).build();
+
+        System.out.println("Starting server...");
+        server.start();
+        System.out.println("Server started!");
+        server.awaitTermination();
+
+```
+
+5. 客户端(基于http2 协议)
+
+使用 grpc-api 包中的 ManagedChannelBuilder 构建channel通道，然后使用grpc 生成的stub 代码，进行远程调用
+```
+ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 9988)
+                .usePlaintext()
+                .build();
+
+        GreetingServiceGrpc.GreetingServiceBlockingStub stub =
+                GreetingServiceGrpc.newBlockingStub(channel);
+
+        Grpc.HelloResponse helloResponse = stub.greeting(
+                Grpc.HelloRequest.newBuilder()
+                        .setName("Ray")
+                        .setAge(18)
+                        .setSentiment(Grpc.Sentiment.HAPPY)
+                        .build());
+
+```
